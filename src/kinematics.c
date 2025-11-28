@@ -1,4 +1,5 @@
 #include <kinematics.h>
+#include <orbit.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -207,15 +208,23 @@ int kinematics_engine_remove_satellite(KinematicsEngine *engine, int sat_id) {
 int kinematics_engine_step(KinematicsEngine *engine) {
     if (!engine) return -1;
     
-    engine->current_time += engine->dt_seconds;
-    engine->step_count++;
+    double dt = engine->dt_seconds;
     
-    // 更新每颗卫星的时间戳
+    // 使用RK4积分更新每颗卫星的轨道状态
     for (int i = 0; i < engine->satellite_count; i++) {
-        if (! engine->satellites[i]) continue;
+        if (!engine->satellites[i]) continue;
         Satellite *sat = engine->satellites[i];
-        sat->state.time = engine->current_time;
+        
+        // 调用RK4轨道外推
+        // 注意：卫星状态使用米单位
+        if (orbit_rk4_step(&sat->state, dt, NULL) != 0) {
+            // 轨道外推失败，跳过这颗卫星
+            continue;
+        }
     }
+    
+    engine->current_time += dt;
+    engine->step_count++;
     
     return 0;
 }

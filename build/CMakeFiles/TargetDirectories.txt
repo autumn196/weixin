@@ -1,5 +1,0 @@
-/home/runner/work/weixin/weixin/build/CMakeFiles/libsatellite_static.dir
-/home/runner/work/weixin/weixin/build/CMakeFiles/satellite_sim.dir
-/home/runner/work/weixin/weixin/build/CMakeFiles/test.dir
-/home/runner/work/weixin/weixin/build/CMakeFiles/edit_cache.dir
-/home/runner/work/weixin/weixin/build/CMakeFiles/rebuild_cache.dir
