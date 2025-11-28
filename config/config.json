@@ -1,0 +1,17 @@
+{
+    "red": {
+        "attack": 3,
+        "recon": 3,
+        "defense": 3
+    },
+    "blue": {
+        "attack": 2,
+        "recon": 2,
+        "defense": 2
+    },
+    "strategy": "GJ",
+    "simulation": {
+        "max_time": 500000,
+        "time_step": 1
+    }
+}
