@@ -2,16 +2,18 @@
 #include <math.h>
 #include <stdio.h>
 
-/* Local constants using km units for consistency with the codebase */
+/* Local constants - positions in meters, velocities in m/s to match satellite initialization */
 #define MU_ORBIT 398600.4418  /* km³/s² */
 #define EPSILON_ORBIT 1e-12
+/* Minimum radius for gravity calculation (10 meters) */
+#define MIN_RADIUS_ORBIT 10.0
 
 int orbit_elements_to_state(OrbitalElements *elements, StateVector *state) {
     if (!elements || !state) return -1;
     
-    /* Convert orbital elements (in km and degrees) to position/velocity (in meters and m/s) */
-    /* Input: a (km), e, i (deg), omega_big (deg), omega_small (deg), m0 (deg) */
-    /* Output: position (m), velocity (m/s) */
+    /* Convert orbital elements (a in km, angles in degrees) to position/velocity (in meters and m/s) */
+    /* Note: The codebase uses meters for positions and m/s for velocities in the state vector */
+    /* (see satellite.c initialization: geo_nominal_radius = 42164000.0 meters) */
     
     double a = elements->a * 1000.0;        /* Convert km to m */
     double e = elements->e;
@@ -301,11 +303,7 @@ int orbit_lambert_solve_simple(Vector3 r1, Vector3 r2, double tof, double mu, Ve
     v1->y = (r2.y - f * r1.y) / g;
     v1->z = (r2.z - f * r1.z) / g;
     
-    v2->x = g_dot * v1->x + (r2.x - f * r1.x) / g * (1.0 - g_dot);
-    v2->y = g_dot * v1->y + (r2.y - f * r1.y) / g * (1.0 - g_dot);
-    v2->z = g_dot * v1->z + (r2.z - f * r1.z) / g * (1.0 - g_dot);
-    
-    /* Recalculate v2 using the correct formula */
+    /* Calculate v2 using f_dot and g_dot */
     double f_dot = sqrt(mu / p) * tan((acos(cos_dnu)) / 2.0) * ((1.0 - cos_dnu) / p - 1.0 / r1_mag - 1.0 / r2_mag);
     v2->x = f_dot * r1.x + g_dot * v1->x;
     v2->y = f_dot * r1.y + g_dot * v1->y;
@@ -332,7 +330,8 @@ static Vector3 compute_gravity_acceleration(Vector3 r) {
     double mu = MU_ORBIT * 1e9;  /* m³/s² */
     double r_mag = sqrt(r.x*r.x + r.y*r.y + r.z*r.z);
     
-    if (r_mag < EPSILON_ORBIT) {
+    /* Check for minimum radius to avoid numerical issues */
+    if (r_mag < MIN_RADIUS_ORBIT) {
         return (Vector3){0, 0, 0};
     }
     

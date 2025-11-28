@@ -210,15 +210,15 @@ int kinematics_engine_step(KinematicsEngine *engine) {
     
     double dt = engine->dt_seconds;
     
-    // 使用RK4积分更新每颗卫星的轨道状态
+    /* Update each satellite's orbit state using RK4 integration */
+    /* Note: Satellite positions are in meters, velocities in m/s */
     for (int i = 0; i < engine->satellite_count; i++) {
         if (!engine->satellites[i]) continue;
         Satellite *sat = engine->satellites[i];
         
-        // 调用RK4轨道外推
-        // 注意：卫星状态使用米单位
+        /* Call RK4 orbit propagation */
         if (orbit_rk4_step(&sat->state, dt, NULL) != 0) {
-            // 轨道外推失败，跳过这颗卫星
+            /* Orbit propagation failed, skip this satellite */
             continue;
         }
     }
